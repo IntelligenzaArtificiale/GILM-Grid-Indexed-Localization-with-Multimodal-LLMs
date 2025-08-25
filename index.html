@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <title>GILM Demo - Grid-Indexed Localization con LLM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { 
+      font-family: system-ui, sans-serif; 
+      margin: 0; 
+      padding: 20px; 
+      background: #f5f5f5; 
+    }
+    .container { 
+      max-width: 1400px; 
+      margin: 0 auto; 
+    }
+    h1 { 
+      color: #333; 
+      margin-bottom: 8px; 
+    }
+    .subtitle { 
+      color: #666; 
+      margin-bottom: 24px; 
+      font-size: 14px; 
+    }
+    .row { 
+      display: flex; 
+      gap: 20px; 
+      flex-wrap: wrap; 
+      margin-bottom: 20px; 
+    }
+    .card { 
+      background: white; 
+      border: 1px solid #ddd; 
+      padding: 20px; 
+      border-radius: 8px; 
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+    }
+    .form-group { 
+      margin-bottom: 16px; 
+    }
+    label { 
+      display: block; 
+      margin-bottom: 4px; 
+      font-weight: 500; 
+      color: #333; 
+    }
+    input, select, textarea { 
+      width: 100%; 
+      padding: 8px; 
+      border: 1px solid #ccc; 
+      border-radius: 4px; 
+      font-size: 14px; 
+      box-sizing: border-box; 
+    }
+    input[type="number"] { 
+      width: 80px; 
+    }
+    input[type="checkbox"] { 
+      width: auto; 
+      margin-right: 8px; 
+    }
+    button { 
+      background: #007ACC; 
+      color: white; 
+      border: none; 
+      padding: 12px 24px; 
+      border-radius: 4px; 
+      cursor: pointer; 
+      font-size: 14px; 
+      font-weight: 500; 
+    }
+    button:hover { 
+      background: #005a9e; 
+    }
+    button:disabled { 
+      background: #ccc; 
+      cursor: not-allowed; 
+    }
+    .preview-container { 
+      text-align: center; 
+      margin: 16px 0; 
+    }
+    .preview-image { 
+      max-width: 100%; 
+      max-height: 300px; 
+      border: 1px solid #ddd; 
+      border-radius: 4px; 
+    }
+    .toggle-container { 
+      margin-top: 12px; 
+    }
+    .toggle-label { 
+      display: inline-flex; 
+      align-items: center; 
+      cursor: pointer; 
+      user-select: none; 
+    }
+    canvas { 
+      max-width: 100%; 
+      border: 1px solid #ccc; 
+      border-radius: 6px; 
+      display: block; 
+      margin: 16px auto; 
+    }
+    .status { 
+      padding: 12px; 
+      border-radius: 4px; 
+      margin: 16px 0; 
+    }
+    .status.loading { 
+      background: #e3f2fd; 
+      color: #1976d2; 
+    }
+    .status.success { 
+      background: #e8f5e8; 
+      color: #2e7d32; 
+    }
+    .status.error { 
+      background: #ffebee; 
+      color: #c62828; 
+    }
+    .status.info { 
+      background: #fff3e0; 
+      color: #ef6c00; 
+    }
+    .hidden { 
+      display: none; 
+    }
+    pre { 
+      background: #f7f7f7; 
+      padding: 12px; 
+      border-radius: 6px; 
+      overflow-x: auto; 
+      font-size: 12px; 
+      max-height: 300px; 
+      overflow-y: auto; 
+    }
+    .form-row { 
+      display: flex; 
+      gap: 12px; 
+      align-items: end; 
+    }
+    .controls { 
+      display: flex; 
+      gap: 12px; 
+      flex-wrap: wrap; 
+      margin-top: 16px; 
+    }
+    .results-section { 
+      margin-top: 20px; 
+    }
+    .detection-card { 
+      background: #f9f9f9; 
+      border: 1px solid #e0e0e0; 
+      padding: 12px; 
+      border-radius: 6px; 
+      margin-bottom: 12px; 
+    }
+    .detection-title { 
+      font-weight: 600; 
+      color: #333; 
+      margin-bottom: 6px; 
+    }
+    .detection-details { 
+      font-size: 14px; 
+      color: #666; 
+    }
+    .footer {
+      margin-top: 40px;
+      padding: 20px 0;
+      border-top: 1px solid #e0e0e0;
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+    }
+    .footer a {
+      color: #007ACC;
+      text-decoration: none;
+    }
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 GILM - Grid-Indexed Localization</h1>
+    <p class="subtitle">Object localization con griglia + LLM multimodali • Versione dimostrativa</p>
+
+    <div class="row">
+      <!-- Pannello configurazione -->
+      <div class="card" style="flex: 1 1 400px;">
+        <h3>⚙️ Configurazione</h3>
+        
+        <div class="form-group">
+          <label for="provider">Provider LLM</label>
+          <select id="provider">
+            <option value="openai">OpenAI (GPT-4o-mini)</option>
+            <option value="anthropic">Anthropic (Claude-3.7-Sonnet)</option>
+            <option value="google">Google (Gemini-2.5-Flash)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="apikey">API Key</label>
+          <input type="password" id="apikey" placeholder="sk-... / sk-ant-... / AIza..." />
+        </div>
+
+        <div class="form-group">
+          <label for="model">Modello (opzionale)</label>
+          <input type="text" id="model" placeholder="Lascia vuoto per default del provider" />
+        </div>
+
+        <div class="form-group">
+          <label for="objects">Oggetti da trovare</label>
+          <input type="text" id="objects" placeholder="es. bulloni, etichette, crepe, anomalie" value="oggetti di interesse" />
+        </div>
+
+        <div class="form-group">
+          <label for="language">Lingua</label>
+          <select id="language">
+            <option value="it">Italiano</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="display">Modalità di visualizzazione</label>
+          <select id="display">
+            <option value="bbox">Bounding box</option>
+            <option value="cells">Highlight celle</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="rows">Righe griglia</label>
+            <input type="number" id="rows" value="12" min="4" max="20" />
+          </div>
+          <div class="form-group">
+            <label for="cols">Colonne griglia</label>
+            <input type="number" id="cols" value="12" min="4" max="20" />
+          </div>
+          <div class="form-group">
+            <label for="maxAreas">Max aree</label>
+            <input type="number" id="maxAreas" value="2" min="1" max="5" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="file">Immagine da analizzare</label>
+          <input type="file" id="file" accept="image/*" />
+        </div>
+
+        <!-- Anteprima immagine con toggle griglia -->
+        <div id="previewContainer" class="preview-container hidden">
+          <img id="preview" class="preview-image" alt="Anteprima" />
+          <div class="toggle-container">
+            <label class="toggle-label">
+              <input type="checkbox" id="toggleGrid" />
+              <span>Mostra griglia sovrapposta</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button id="run">🚀 Analizza</button>
+          <button id="clear" type="button">🗑️ Pulisci</button>
+        </div>
+      </div>
+
+      <!-- Pannello risultati -->
+      <div class="card" style="flex: 2 1 600px;">
+        <h3>📊 Risultati</h3>
+        
+        <div id="status"></div>
+        
+        <canvas id="canvas" class="hidden"></canvas>
+        
+        <div id="results" class="results-section"></div>
+        
+        <details style="margin-top: 20px;">
+          <summary style="cursor: pointer; font-weight: 500;">Risposta raw del modello</summary>
+          <pre id="raw"></pre>
+        </details>
+      </div>
+    </div>
+    
+    <!-- Footer con copyright -->
+    <footer class="footer">
+      <p>© 2025 GILM - Grid-Indexed Localization • Sviluppato per <a href="https://intelligenzaartificialeitalia.net" target="_blank">intelligenzaartificialeitalia.net</a></p>
+      <p>Libreria open source sotto licenza AGPL-3.0-or-later</p>
+    </footer>
+  </div>
+
+  <!-- Moduli GILM - IMPORTANTE: mantenere questo ordine -->
+  <script src="./gilm-grid.js"></script>
+  <script src="./gilm-providers.js"></script>
+  <script src="./gilm-core.js"></script>
+
+  <script>
+    // Verifica che i moduli siano caricati correttamente
+    if (typeof GILMGrid === 'undefined') {
+      console.error('ERRORE: GILMGrid non caricato. Verifica che gilm-grid.js sia presente.');
+      alert('Errore: Modulo GILMGrid non trovato. Verifica che tutti i file JS siano presenti.');
+    }
+    if (typeof GILMProviders === 'undefined') {
+      console.error('ERRORE: GILMProviders non caricato. Verifica che gilm-providers.js sia presente.');
+      alert('Errore: Modulo GILMProviders non trovato. Verifica che tutti i file JS siano presenti.');
+    }
+    if (typeof GILMCore === 'undefined') {
+      console.error('ERRORE: GILMCore non caricato. Verifica che gilm-core.js sia presente.');
+      alert('Errore: Modulo GILMCore non trovato. Verifica che tutti i file JS siano presenti.');
+    }
+
+    // Riferimenti DOM
+    const $ = (sel) => document.querySelector(sel);
+    const elements = {
+      provider: $("#provider"),
+      apikey: $("#apikey"),
+      model: $("#model"),
+      objects: $("#objects"),
+      language: $("#language"),
+      display: $("#display"),
+      rows: $("#rows"),
+      cols: $("#cols"),
+      maxAreas: $("#maxAreas"),
+      file: $("#file"),
+      previewContainer: $("#previewContainer"),
+      preview: $("#preview"),
+      toggleGrid: $("#toggleGrid"),
+      run: $("#run"),
+      clear: $("#clear"),
+      status: $("#status"),
+      canvas: $("#canvas"),
+      results: $("#results"),
+      raw: $("#raw")
+    };
+
+    // Stato dell'applicazione
+    let state = {
+      originalDataURL: null,
+      gridDataURL: null,
+      currentFile: null,
+      gridResult: null
+    };
+
+    // Event listeners
+    elements.file.addEventListener('change', handleFileSelect);
+    elements.toggleGrid.addEventListener('change', toggleGridPreview);
+    elements.run.addEventListener('click', runAnalysis);
+    elements.clear.addEventListener('click', clearAll);
+    
+    // Listener per rigenerare griglia quando cambiano parametri
+    elements.rows.addEventListener('change', regenerateGrid);
+    elements.cols.addEventListener('change', regenerateGrid);
+
+    // Rigenerazione griglia con nuovi parametri
+    async function regenerateGrid() {
+      if (!state.currentFile) return;
+      
+      try {
+        showStatus('Aggiornamento griglia...', 'loading');
+        
+        const rows = parseInt(elements.rows.value, 10);
+        const cols = parseInt(elements.cols.value, 10);
+        
+        state.gridResult = await GILMGrid.composeGrid(state.currentFile, { rows, cols });
+        state.gridDataURL = state.gridResult.gridDataURL;
+        
+        // Se la griglia è attualmente mostrata, aggiorna la preview
+        if (elements.toggleGrid.checked) {
+          elements.preview.src = state.gridDataURL;
+        }
+        
+        showStatus('Griglia aggiornata.', 'success');
+      } catch (error) {
+        showStatus(`Errore aggiornamento griglia: ${error.message}`, 'error');
+      }
+    }
+
+    // Gestione selezione file
+    async function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) {
+        hidePreview();
+        return;
+      }
+
+      try {
+        showStatus('Elaborazione immagine...', 'loading');
+        
+        state.currentFile = file;
+        state.originalDataURL = await fileToDataURL(file);
+        
+        // Genera versione con griglia
+        const rows = parseInt(elements.rows.value, 10);
+        const cols = parseInt(elements.cols.value, 10);
+        
+        state.gridResult = await GILMGrid.composeGrid(file, { rows, cols });
+        state.gridDataURL = state.gridResult.gridDataURL;
+        
+        // Mostra anteprima (inizialmente senza griglia)
+        elements.preview.src = state.originalDataURL;
+        elements.previewContainer.classList.remove('hidden');
+        elements.toggleGrid.checked = false;
+        
+        showStatus('Immagine caricata. Configura i parametri e clicca Analizza.', 'success');
+        
+      } catch (error) {
+        showStatus(`Errore nel caricamento: ${error.message}`, 'error');
+        hidePreview();
+      }
+    }
+
+    // Toggle anteprima griglia
+    function toggleGridPreview() {
+      if (!state.originalDataURL || !state.gridDataURL) return;
+      
+      elements.preview.src = elements.toggleGrid.checked ? 
+        state.gridDataURL : state.originalDataURL;
+    }
+
+    // Esecuzione analisi
+    async function runAnalysis() {
+      if (!state.currentFile) {
+        showStatus('Seleziona prima un\'immagine.', 'error');
+        return;
+      }
+
+      const apiKey = elements.apikey.value.trim();
+      if (!apiKey) {
+        showStatus('Inserisci una API key valida.', 'error');
+        return;
+      }
+
+      // Verifica che i moduli GILM siano disponibili
+      if (typeof GILMGrid === 'undefined') {
+        showStatus('Errore: Modulo GILMGrid non caricato. Ricarica la pagina.', 'error');
+        return;
+      }
+      if (typeof GILMProviders === 'undefined') {
+        showStatus('Errore: Modulo GILMProviders non caricato. Ricarica la pagina.', 'error');
+        return;
+      }
+      if (typeof GILMCore === 'undefined') {
+        showStatus('Errore: Modulo GILMCore non caricato. Ricarica la pagina.', 'error');
+        return;
+      }
+
+      try {
+        showStatus('Analisi in corso...', 'loading');
+        clearResults();
+
+        // Crea provider
+        const providerId = elements.provider.value;
+        const model = elements.model.value.trim() || undefined;
+        const provider = GILMProviders.createProvider(providerId, { apiKey, model });
+
+        // Configurazione analisi
+        const config = {
+          fileOrDataURL: state.currentFile,
+          rows: parseInt(elements.rows.value, 10),
+          cols: parseInt(elements.cols.value, 10),
+          maxAreas: parseInt(elements.maxAreas.value, 10),
+          padRatio: 0.02,
+          displayMode: elements.display.value,
+          canvas: elements.canvas,
+          objects: elements.objects.value.trim(),
+          language: elements.language.value
+        };
+
+        // Esegui analisi
+        const result = await GILMCore.analyzeWithGrid(provider, config);
+        
+        // Mostra risultati
+        displayResults(result);
+        elements.raw.textContent = result.raw || '';
+
+      } catch (error) {
+        showStatus(`Errore durante l'analisi: ${error.message}`, 'error');
+        console.error(error);
+      }
+    }
+
+    // Visualizzazione risultati
+    function displayResults(result) {
+      if (result.error) {
+        showStatus(`Errore: ${result.error}`, 'error');
+        return;
+      }
+
+      if (result.noDetections) {
+        showStatus('Nessuna anomalia rilevata.', 'info');
+        elements.results.innerHTML = `
+          <div class="detection-card">
+            <div class="detection-title">✅ Nessuna rilevazione</div>
+            <div class="detection-details">${result.reason || 'Il modello non ha identificato oggetti di interesse nell\'immagine.'}</div>
+          </div>
+        `;
+        return;
+      }
+
+      // Mostra canvas con risultati
+      elements.canvas.classList.remove('hidden');
+      
+      const areas = result.areas || [];
+      if (areas.length === 0) {
+        showStatus('Analisi completata, nessuna area identificata.', 'info');
+        return;
+      }
+
+      showStatus(`Analisi completata! Identificate ${areas.length} aree.`, 'success');
+
+      // Genera riepilogo risultati
+      let resultsHTML = `<h4>🎯 Aree identificate (${areas.length})</h4>`;
+      
+      areas.forEach((area, i) => {
+        const cells = (area.cells || []).join(', ');
+        const score = area.score ? ` (${Math.round(area.score * 100)}%)` : '';
+        
+        resultsHTML += `
+          <div class="detection-card">
+            <div class="detection-title">
+              ${i + 1}. ${area.label || 'Area di interesse'}${score}
+            </div>
+            <div class="detection-details">
+              <strong>Celle:</strong> ${cells}<br>
+              ${area.explanation || ''}
+            </div>
+          </div>
+        `;
+      });
+
+      elements.results.innerHTML = resultsHTML;
+    }
+
+    // Pulisci tutto
+    function clearAll() {
+      // Reset stato
+      state = {
+        originalDataURL: null,
+        gridDataURL: null,
+        currentFile: null,
+        gridResult: null
+      };
+
+      // Reset UI
+      elements.file.value = '';
+      hidePreview();
+      clearResults();
+      elements.raw.textContent = '';
+      showStatus('Interfaccia pulita. Carica un\'immagine per iniziare.', 'info');
+    }
+
+    // Utility functions
+    function hidePreview() {
+      elements.previewContainer.classList.add('hidden');
+      elements.preview.src = '';
+    }
+
+    function clearResults() {
+      elements.canvas.classList.add('hidden');
+      elements.results.innerHTML = '';
+      const ctx = elements.canvas.getContext('2d');
+      ctx.clearRect(0, 0, elements.canvas.width, elements.canvas.height);
+    }
+
+    function showStatus(message, type = 'info') {
+      elements.status.className = `status ${type}`;
+      elements.status.textContent = message;
+      elements.status.classList.remove('hidden');
+    }
+
+    function fileToDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Inizializzazione
+    showStatus('Carica un\'immagine per iniziare l\'analisi.', 'info');
+  </script>
+</body>
+</html>
