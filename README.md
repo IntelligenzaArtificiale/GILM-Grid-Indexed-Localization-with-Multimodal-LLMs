@@ -15,10 +15,10 @@
 
 ## Abstract
 
-I Vision-Language Models (VLM) eccellono nell'interpretazione semantica delle immagini ma mostrano instabilità critica nella localizzazione precisa di oggetti, generando coordinate metriche inconsistenti tra esecuzioni multiple. GILM introduce un paradigma innovativo che delega ai modelli esclusivamente le decisioni semantiche, mantenendo tutte le trasformazioni geometriche deterministica lato sistema. Attraverso una griglia indicizzata sovrapposta all'immagine, GILM ottiene localizzazione robusta con qualsiasi provider VLM, dimostrando prestazioni **equivalenti al spatial understanding di Gemini 2.5** su oggetti comuni e **superiori su domini specializzati** dove i metodi tradizionali falliscono.
+I Vision-Language Models (LLM) eccellono nell'interpretazione semantica delle immagini ma mostrano instabilità critica nella localizzazione precisa di oggetti, generando coordinate metriche inconsistenti tra esecuzioni multiple. GILM introduce un paradigma innovativo che delega ai modelli esclusivamente le decisioni semantiche, mantenendo tutte le trasformazioni geometriche deterministica lato sistema. Attraverso una griglia indicizzata sovrapposta all'immagine, GILM ottiene localizzazione robusta con qualsiasi provider LLM, dimostrando prestazioni **equivalenti al spatial understanding di Gemini 2.5** su oggetti comuni e **superiori su domini specializzati** dove i metodi tradizionali falliscono.
 
 **Contributi principali:**
-- Metodologia provider-agnostic per object detection con VLM arbitrari
+- Metodologia provider-agnostic per object detection con LLM arbitrari
 - Eliminazione del drift spaziale attraverso coordinate discrete  
 - Architettura modulare zero-dipendenze per deployment immediato
 - Validazione empirica su scenari daily-object e domain-expert
@@ -27,9 +27,9 @@ I Vision-Language Models (VLM) eccellono nell'interpretazione semantica delle im
 
 ## 1. Introduzione e Motivazione
 
-### 1.1 Problema della Localizzazione nei VLM
+### 1.1 Problema della Localizzazione nei LLM
 
-I modelli multimodali contemporanei (GPT-4V, Claude 3.7, Gemini 2.5) dimostrano eccellenti capacità di comprensione visiva ma soffrono di **instabilità geometrica** nella localizzazione di oggetti. Problematiche ricorrenti includono:
+I modelli multimodali contemporanei (GPT-4.1-mini, Claude 3.7, Gemini 2.5) dimostrano eccellenti capacità di comprensione visiva ma soffrono di **instabilità geometrica** nella localizzazione di oggetti. Problematiche ricorrenti includono:
 
 - **Drift spaziale**: Varianza σ² > 15% nelle coordinate tra run identici
 - **Inconsistenza formatica**: Mix di coordinate normalizzate, pixel, percentuali  
@@ -51,8 +51,8 @@ I modelli multimodali contemporanei (GPT-4V, Claude 3.7, Gemini 2.5) dimostrano 
 GILM risolve l'instabilità attraverso **separazione semantico-geometrica**:
 
 ```
-Tradizionale: VLM → [coordinate metriche instabili]
-GILM:         VLM → [celle semantiche] → [coordinate deterministiche]
+Tradizionale: LLM → [coordinate metriche instabili]
+GILM:         LLM → [celle semantiche] → [coordinate deterministiche]
 ```
 
 ---
@@ -67,7 +67,7 @@ Il sistema GILM opera attraverso quattro fasi sequenziali:
 graph TD
     A[Immagine Input I] --> B[Grid Overlay G]
     B --> C[Prompt Strutturato P] 
-    C --> D[VLM Provider Π]
+    C --> D[LLM Provider Π]
     D --> E[Parse Semantico]
     E --> F[Mapping Geometrico]
     F --> G[Bounding Boxes B]
@@ -127,9 +127,9 @@ Var(coords_traditional) = σ²_spatial + σ²_model
 Var(coords_GILM) = 0 + σ²_semantic ≪ σ²_spatial
 ```
 
-**Provider Agnostic:** Qualsiasi VLM Π con capacità multimodali:
+**Provider Agnostic:** Qualsiasi LLM Π con capacità multimodali:
 ```
-GILM(I, Π) → B  ∀Π ∈ {GPT-4V, Claude-3.7, Gemini-2.5, ...}
+GILM(I, Π) → B  ∀Π ∈ {GPT-4.1-mini, Claude-3.7, Gemini-2.5, ...}
 ```
 
 ---
@@ -247,7 +247,7 @@ const config = {
 ### 5.1 Punti di Forza
 
 ✅ **Eliminazione drift spaziale**: Coordinate deterministiche  
-✅ **Provider agnostic**: Funziona con qualsiasi VLM multimodale  
+✅ **Provider agnostic**: Funziona con qualsiasi LLM multimodale  
 ✅ **Domain expert superiority**: Eccelle dove altri approcci falliscono  
 ✅ **Zero dependencies**: Deploy immediato senza installazioni  
 ✅ **Open source**: Trasparenza e modificabilità completa
@@ -270,7 +270,7 @@ const config = {
 
 ## 6. Conclusioni
 
-GILM dimostra che la **separazione semantico-geometrica** risolve efficacemente l'instabilità dei VLM nella localizzazione di oggetti. I risultati empirici confermano:
+GILM dimostra che la **separazione semantico-geometrica** risolve efficacemente l'instabilità dei LLM nella localizzazione di oggetti. I risultati empirici confermano:
 
 1. **Parità su daily objects** con spatial understanding nativo  
 2. **Superiorità su domain expert** dove approcci tradizionali falliscono
@@ -279,9 +279,9 @@ GILM dimostra che la **separazione semantico-geometrica** risolve efficacemente 
 L'approccio apre nuove possibilità per utilizzare modelli come GPT-4o-mini in scenari di computer vision prima inaccessibili, democratizzando l'object detection avanzata.
 
 **Impatto pratico:**
-- Sviluppatori possono usare qualsiasi provider VLM per bounding box
+- Sviluppatori possono usare qualsiasi provider LLM per bounding box
 - Domini specializzati ottengono finalmente localizzazione affidabile  
-- Costi ridotti attraverso modelli più economici (GPT-4o-mini vs GPT-4V)
+- Costi ridotti attraverso modelli più economici (GPT-4o-mini vs GPT-4.1-mini)
 
 ---
 
@@ -354,7 +354,7 @@ Le immagini utilizzate negli esperimenti sono disponibili in:
 
 ---
 
-**🚀 Prova GILM oggi stesso e scopri come abilitare object detection robusta con qualsiasi provider VLM!**
+**🚀 Prova GILM oggi stesso e scopri come abilitare object detection robusta con qualsiasi provider LLM!**
 
 *Sviluppato con ❤️ da [Alessandro Ciciarelli](https://intelligenzaartificialeitalia.net) per democratizzare l'AI vision in Italia e nel mondo.*
 
@@ -364,7 +364,7 @@ Le immagini utilizzate negli esperimenti sono disponibili in:
 
 ```
 gilm-grid.js      → Gestione griglia e rendering
-gilm-providers.js → Adapter per provider LLM/VLM  
+gilm-providers.js → Adapter per provider LLM/LLM  
 gilm-core.js      → Orchestratore e logica principale
 ```
 
@@ -374,7 +374,7 @@ gilm-core.js      → Orchestratore e logica principale
 graph TD
     A[Immagine input] --> B[Genera griglia sovrapposta]
     B --> C[Costruisci prompt strutturato]
-    C --> D[Invia a provider VLM]
+    C --> D[Invia a provider LLM]
     D --> E[Parse risposta JSON]
     E --> F{Aree rilevate?}
     F -->|No| G[Nessuna rilevazione]

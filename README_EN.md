@@ -15,10 +15,10 @@
 
 ## Abstract
 
-Vision-Language Models (VLMs) excel at semantic image interpretation but show critical instability in precise object localization, generating inconsistent metric coordinates across multiple executions. GILM introduces an innovative paradigm that delegates exclusively semantic decisions to models while maintaining all geometric transformations deterministic system-side. Through an indexed grid overlaid on the image, GILM achieves robust localization with any VLM provider, demonstrating performance **equivalent to Gemini 2.5's spatial understanding** on common objects and **superior on specialized domains** where traditional methods fail.
+Vision-Language Models (LLMs) excel at semantic image interpretation but show critical instability in precise object localization, generating inconsistent metric coordinates across multiple executions. GILM introduces an innovative paradigm that delegates exclusively semantic decisions to models while maintaining all geometric transformations deterministic system-side. Through an indexed grid overlaid on the image, GILM achieves robust localization with any LLM provider, demonstrating performance **equivalent to Gemini 2.5's spatial understanding** on common objects and **superior on specialized domains** where traditional methods fail.
 
 **Main contributions:**
-- Provider-agnostic methodology for object detection with arbitrary VLMs
+- Provider-agnostic methodology for object detection with arbitrary LLMs
 - Elimination of spatial drift through discrete coordinates  
 - Zero-dependency modular architecture for immediate deployment
 - Empirical validation on daily-object and domain-expert scenarios
@@ -27,9 +27,9 @@ Vision-Language Models (VLMs) excel at semantic image interpretation but show cr
 
 ## 1. Introduction and Motivation
 
-### 1.1 Localization Problem in VLMs
+### 1.1 Localization Problem in LLMs
 
-Contemporary multimodal models (GPT-4V, Claude 3.7, Gemini 2.5) demonstrate excellent visual understanding capabilities but suffer from **geometric instability** in object localization. Recurring issues include:
+Contemporary multimodal models (GPT-4.1-mini, Claude 3.7, Gemini 2.5) demonstrate excellent visual understanding capabilities but suffer from **geometric instability** in object localization. Recurring issues include:
 
 - **Spatial drift**: Variance σ² > 15% in coordinates between identical runs
 - **Format inconsistency**: Mix of normalized coordinates, pixels, percentages  
@@ -51,8 +51,8 @@ Contemporary multimodal models (GPT-4V, Claude 3.7, Gemini 2.5) demonstrate exce
 GILM resolves instability through **semantic-geometric separation**:
 
 ```
-Traditional: VLM → [unstable metric coordinates]
-GILM:        VLM → [semantic cells] → [deterministic coordinates]
+Traditional: LLM → [unstable metric coordinates]
+GILM:        LLM → [semantic cells] → [deterministic coordinates]
 ```
 
 ---
@@ -67,7 +67,7 @@ The GILM system operates through four sequential phases:
 graph TD
     A[Input Image I] --> B[Grid Overlay G]
     B --> C[Structured Prompt P] 
-    C --> D[VLM Provider Π]
+    C --> D[LLM Provider Π]
     D --> E[Semantic Parsing]
     E --> F[Geometric Mapping]
     F --> G[Bounding Boxes B]
@@ -127,9 +127,9 @@ Var(coords_traditional) = σ²_spatial + σ²_model
 Var(coords_GILM) = 0 + σ²_semantic ≪ σ²_spatial
 ```
 
-**Provider Agnostic:** Any VLM Π with multimodal capabilities:
+**Provider Agnostic:** Any LLM Π with multimodal capabilities:
 ```
-GILM(I, Π) → B  ∀Π ∈ {GPT-4V, Claude-3.7, Gemini-2.5, ...}
+GILM(I, Π) → B  ∀Π ∈ {GPT-4.1-mini, Claude-3.7, Gemini-2.5, ...}
 ```
 
 ---
@@ -247,7 +247,7 @@ const config = {
 ### 5.1 Strengths
 
 ✅ **Spatial drift elimination**: Deterministic coordinates  
-✅ **Provider agnostic**: Works with any multimodal VLM  
+✅ **Provider agnostic**: Works with any multimodal LLM  
 ✅ **Domain expert superiority**: Excels where other approaches fail  
 ✅ **Zero dependencies**: Immediate deployment without installations  
 ✅ **Open source**: Complete transparency and modifiability
@@ -270,7 +270,7 @@ const config = {
 
 ## 6. Conclusions
 
-GILM demonstrates that **semantic-geometric separation** effectively resolves VLM instability in object localization. Empirical results confirm:
+GILM demonstrates that **semantic-geometric separation** effectively resolves LLM instability in object localization. Empirical results confirm:
 
 1. **Parity on daily objects** with native spatial understanding  
 2. **Superiority on domain expert** where traditional approaches fail
@@ -279,9 +279,9 @@ GILM demonstrates that **semantic-geometric separation** effectively resolves VL
 The approach opens new possibilities for using models like GPT-4o-mini in computer vision scenarios previously inaccessible, democratizing advanced object detection.
 
 **Practical impact:**
-- Developers can use any VLM provider for bounding boxes
+- Developers can use any LLM provider for bounding boxes
 - Specialized domains finally get reliable localization  
-- Reduced costs through cheaper models (GPT-4o-mini vs GPT-4V)
+- Reduced costs through cheaper models (GPT-4o-mini vs GPT-4.1-mini)
 
 ---
 
@@ -354,6 +354,6 @@ Images used in experiments are available in:
 
 ---
 
-**🚀 Try GILM today and discover how to enable robust object detection with any VLM provider!**
+**🚀 Try GILM today and discover how to enable robust object detection with any LLM provider!**
 
 *Developed with ❤️ by [Alessandro Ciciarelli](https://intelligenzaartificialeitalia.net) to democratize AI vision in Italy and worldwide.*
